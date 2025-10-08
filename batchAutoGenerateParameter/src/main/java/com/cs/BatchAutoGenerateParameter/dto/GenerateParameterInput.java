@@ -14,6 +14,6 @@ public class GenerateParameterInput {
 	
 	private String enterpriseId;
 	private String terminalId;
-	private boolean generateAll;
+//	private boolean generateAll;
 
 }

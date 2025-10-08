@@ -7,6 +7,7 @@ import java.util.Locale;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
@@ -22,14 +23,17 @@ import com.cs.BatchAutoGenerateParameter.services.GenerateParamterV1;
 public class BatchAutoGenerateParameterApplication implements CommandLineRunner {
 
 	// mvn package -Dmaven.test.skip
-	// java -jar target/batchAutoGenerateParameter-0.0.1-SNAPSHOT.jar [1,2,3,4]
-	// [YYYYMM]
+	// java -jar target/batchAutoGenerateParameter-0.0.1-SNAPSHOT.jar [enterpriseId] [terminalId]
+	
 	private static final Logger log = LogManager.getLogger(BatchAutoGenerateParameterApplication.class);
 	private static final Date currentDate = new Date();
 
 	private final ConfigurableApplicationContext context;
 	private static long TIME_LIMIT = 3600000; // 1 ชั่วโมง = 3600000 มิลลิวินาที
 	private long startTime;
+	
+	@Value("${db.batchSize}")
+	private String batchSize;
 
 	@Autowired
 	private GenerateParamterV1 v1;
@@ -50,7 +54,7 @@ public class BatchAutoGenerateParameterApplication implements CommandLineRunner 
 
 		String enterpriseId = null;
 		String terminalId = null;
-		boolean generateAll = false;
+//		boolean generateAll = false;
 		for (int i = 0; i < args.length; i++) {
 			log.info("Parameter " + (i + 1) + ": " + args[i]);
 		}
@@ -84,21 +88,24 @@ public class BatchAutoGenerateParameterApplication implements CommandLineRunner 
 
 			log.info("--- Not in condtion ---");
 			return ;
-		} else {
-			generateAll = true;
-			log.info("--- Generate All ---");
-		}
+		} 
+//		else {
+//			generateAll = true;
+//			log.info("--- Generate All ---");
+//		}
 		log.info("-------------------------------------------------------------------");
 		String currenDateStringDDMMYYYY = getDate(currentDate, new SimpleDateFormat(Constants.dd_MM_yyyy_HHmmss, Locale.US));
 		log.info("Date : " + currenDateStringDDMMYYYY);
 		log.info("Enterprise ID : " + enterpriseId);
 		log.info("Terminal ID : " + terminalId);
-		log.info("Generate all flag : " + generateAll);
+//		log.info("Generate all flag : " + generateAll);
 		log.info("-------------------------------------------------------------------");
-		GenerateParameterInput input = new GenerateParameterInput(enterpriseId, terminalId, generateAll);
+		log.info("Batch size : " + batchSize);
+		log.info("-------------------------------------------------------------------");
+		GenerateParameterInput input = new GenerateParameterInput(enterpriseId, terminalId);
 		v1.AutoGenerateParameter(input);
 
-		log.info("*******************************************************************");
+		log.info("**************** End BatchAutoGenerateParameter ****************");
 
 	}
 

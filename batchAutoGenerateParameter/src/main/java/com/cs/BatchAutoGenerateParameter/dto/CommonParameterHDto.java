@@ -9,31 +9,26 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+
 @Data
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommonGenereateDetailInfo implements Serializable{
-	
-	private static final long serialVersionUID = -2555844614275338627L;
-	private Integer commonDId;
-	private Integer commonParameterHId;
-	private Integer parameterVersionId;
-	private Integer parameterId;
-	private String parameterValue;
+public class CommonParameterHDto implements Serializable{
+
+	private static final long serialVersionUID = -8007480315726947883L;
+	private Integer id;
+	private Integer enterpriseId;
+	private boolean activeFlag;
+	private Date startDate;
 	private Integer applicationStatus;
 	private String rejectReason;
 	private Integer approveById;
-	private Date approveDate;
+	private String approveDate;
 	private String actionForm;
 	private Integer createdById;
 	private Date createdDate;
 	private Integer updatedById;
 	private Date updatedDate;
-	private String parameterCode;
-	
-	private Integer enterpriseIdPk;
-	private Integer merchantIdPk;
-	private Boolean batchFlag;
-
+	private boolean batchFlag;
 }

@@ -11,10 +11,6 @@ import org.springframework.stereotype.Service;
 import com.cs.BatchAutoGenerateParameter.dao.ICommonParameterDDao;
 import com.cs.BatchAutoGenerateParameter.dto.CommonGenerateInfo;
 import com.cs.BatchAutoGenerateParameter.dto.CommonGenereateDetailInfo;
-import com.cs.BatchAutoGenerateParameter.dto.CommonParameterDDto;
-import com.cs.BatchAutoGenerateParameter.dto.CommonParameterData;
-import com.cs.BatchAutoGenerateParameter.entities.CommonParameterD;
-import com.cs.BatchAutoGenerateParameter.mapper.ICommonParameterDMapper;
 import com.cs.BatchAutoGenerateParameter.repositories.ICommonParameterDJPARepository;
 import com.cs.BatchAutoGenerateParameter.utils.DateUtils;
 
@@ -25,18 +21,18 @@ public class CommonParameterDDaoImpl implements ICommonParameterDDao {
 	@Autowired
 	private ICommonParameterDJPARepository repoD;
 
-	@Autowired
-	private ICommonParameterDMapper mapper;
+//	@Autowired
+//	private ICommonParameterDMapper mapper;
 
-	@Override
-	public CommonParameterDDto save(CommonParameterDDto commonParameterDDto) throws Exception {
-		CommonParameterD save = mapper.toEntity(commonParameterDDto);
-		CommonParameterD result = repoD.save(save);
-		CommonParameterDDto resultReturn = mapper.toDto(result);
-
-		logger.info("save mst_commonParameterD successful.");
-		return resultReturn;
-	}
+//	@Override
+//	public CommonParameterDDto save(CommonParameterDDto commonParameterDDto) throws Exception {
+//		CommonParameterD save = mapper.toEntity(commonParameterDDto);
+//		CommonParameterD result = repoD.save(save);
+//		CommonParameterDDto resultReturn = mapper.toDto(result);
+//
+//		logger.info("save mst_commonParameterD successful.");
+//		return resultReturn;
+//	}
 
 //	@Override
 //	public List<CommonParameterData> findByVersionIdAndHId(Integer parameterVersionId, Integer commonParameterHId)
@@ -104,6 +100,7 @@ public class CommonParameterDDaoImpl implements ICommonParameterDDao {
 				dto.setParameterCode(row[14] != null ? (String) row[14] : null);
 				dto.setEnterpriseIdPk(row[15] != null ? (int) row[15] : null);
 				dto.setMerchantIdPk(row[16] != null ? (int) row[16] : null);
+				dto.setBatchFlag(row[17] != null ? (Boolean) row[17] : null);
 				list.add(dto);
 			}
 
@@ -166,21 +163,21 @@ public class CommonParameterDDaoImpl implements ICommonParameterDDao {
 		return infoList;
 	}
 
-	@Override
-	public void saveList(List<CommonParameterDDto> comParameterDDtoList) throws Exception {
-
-		List<CommonParameterD> audits = new ArrayList<>();
-
-		for (CommonParameterDDto d : comParameterDDtoList) {
-			CommonParameterD tmpSave = mapper.toEntity(d);
-			System.err.println("--------------------------------");
-			System.out.println("save=" + tmpSave.toString());
-			audits.add(tmpSave);
-		}
-		repoD.saveAll(audits);
-		logger.info("save mst_commonParameterD successful.");
-
-	}
+//	@Override
+//	public void saveList(List<CommonParameterDDto> comParameterDDtoList) throws Exception {
+//
+//		List<CommonParameterD> audits = new ArrayList<>();
+//
+//		for (CommonParameterDDto d : comParameterDDtoList) {
+//			CommonParameterD tmpSave = mapper.toEntity(d);
+//			System.err.println("--------------------------------");
+//			System.out.println("save=" + tmpSave.toString());
+//			audits.add(tmpSave);
+//		}
+//		repoD.saveAll(audits);
+//		logger.info("save mst_commonParameterD successful.");
+//
+//	}
 
 	@Override
 	public List<CommonGenerateInfo> searchGenerateCommonHAll() throws Exception {
@@ -194,7 +191,6 @@ public class CommonParameterDDaoImpl implements ICommonParameterDDao {
 				info.setParameterVersionId(row[1] != null ? (int) row[1] : null);
 				info.setParameterVersion(row[2] != null ? (int) row[2] : null);
 				info.setEnterpriseIdPk(row[3] != null ? (int) row[3] : null);
-				;
 				info.setMerchantIdPk(row[4] != null ? (int) row[4] : null);
 				info.setBatchFlag(row[5] != null ? (Boolean) row[5] : null);
 				info.setEnterpriseId(row[6] != null ? (String) row[6] : null);

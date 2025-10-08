@@ -36,5 +36,6 @@ public class IndividualGenerateDetailInfo implements Serializable{
 	
 	private int enterpriseIdPk;
 	private int merchantIdPk;
+	private Boolean batchFlag;
 
 }

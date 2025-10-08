@@ -4,10 +4,13 @@ package com.cs.BatchAutoGenerateParameter.repositories;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.cs.BatchAutoGenerateParameter.dto.IndividualParameterHDto;
 import com.cs.BatchAutoGenerateParameter.entities.IndividualParameterH;
 
 
@@ -166,5 +169,40 @@ public interface IIndividualParameterHJPARepository extends JpaRepository<Indivi
 
 	@Query(value = querySearchIndividualH, nativeQuery = true)
 	List<Object[]> searchIndividualParameterHByParameterId(@Param("parameterId") Integer parameterId);
+	
+	
+	final String dtoColumn = """ 
+			new com.cs.BatchAutoGenerateParameter.dto.IndividualParameterHDto(	
+			h.id,
+			h.merchantId,
+			h.terminalId,
+			h.fromTerminalId,
+			h.activeFlag,
+			h.startDate,
+			h.applicationStatus,
+			h.rejectReason,
+			h.approveById,
+			h.approveDate,
+			h.actionForm,
+			h.createdById,
+			h.createdDate,
+			h.updatedById,
+			h.updatedDate,
+			h.batchFlag)
+			""";
+	
+	@Query(" SELECT "
+			+ dtoColumn
+			+ " FROM IndividualParameterH h where h.id = :id ")
+	IndividualParameterHDto findDtoById(@Param("id") Integer id);
+	
+	@Modifying
+	@Transactional
+	@Query("""
+	    UPDATE IndividualParameterH h 
+	    SET h.batchFlag = true, h.updatedDate = CURRENT_TIMESTAMP , h.updatedById=:updatedById
+	    WHERE h.id IN :ids
+	""")
+	int updateBatchFlag(@Param("ids") List<Integer> ids, int updatedById);
 
 }

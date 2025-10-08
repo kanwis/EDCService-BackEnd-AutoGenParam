@@ -82,6 +82,7 @@ public interface IIndividualParameterDJPARepository extends JpaRepository<Indivi
 			 	,tm.parameter_code
 			 	,e.id as enterpriseId
 			 	,m.id as merchantId
+			 	,h.batch_flag
 			
 				FROM mst_individual_parameter_h h 
 				LEFT JOIN mst_individual_parameter_version v ON v.individual_parameter_h_id = h.id

@@ -58,45 +58,11 @@ public interface ICommonParameterDJPARepository extends JpaRepository<CommonPara
 			 
 			""";
 	
-	final String findByVersionIdAndHIdQueue = """
-			SELECT d.`id`,
-			 d.`common_parameter_h_id`,
-			 d.`parameter_version_id`, 
-			 d.`parameter_id`,
-			 d.`parameter_value`,
-			 d.`application_status`, 
-			 d.`reject_reason`, 
-			 d.`approve_by_id`, 
-			 d.`approve_date`, 
-			 d.`action_form`, 
-			 d.`created_by_id`, 
-			 d.`created_date`, 
-			 d.`updated_by_id`, 
-			 d.updated_date, 
-			 pt.pack_type ,
-			 t.parameter_code,
-			 pt.id as pack_id,
-			 t.parameter_length, 
-			 t.parameter_value,
-			 t.description 
-			 FROM `mst_common_parameter_d` d 
-			 INNER JOIN mst_common_parameter_h h on h.id = d.common_parameter_h_id 
-			 INNER JOIN mst_common_parameter_version v on v.id = d.parameter_version_id 
-			 INNER JOIN mst_terminal_parameter t on t.id = d.parameter_id 
-			 INNER JOIN mst_pack_type pt on pt.id = t.pack_type_id 
-			 where
-			 d.parameter_version_id = :parameterVersionId and d.common_parameter_h_id = :commonParameterHId
-			 ORDER BY v.parameter_version DESC;
-			
-							        """;
-
-	@Query(value = findByVersionIdAndHIdQueue, nativeQuery = true)
-	List<Object[]> findByVersionIdAndHId(@Param("parameterVersionId") Integer parameterVersionId,@Param("commonParameterHId") Integer commonParameterHId);
-	
 	final String querySearchDetailD = baseColumn+"""
 			,tp.parameter_code
 			,e.id as enterpriseId
 			,m.id as merchantId
+			,h.batch_flag
 			
 			FROM mst_common_parameter_h h 
 			LEFT JOIN mst_common_parameter_version v ON v.common_parameter_h_id = h.id

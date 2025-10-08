@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.cs.BatchAutoGenerateParameter.BatchAutoGenerateParameterApplication;
 import com.cs.BatchAutoGenerateParameter.dto.GenerateParameter;
 import com.cs.BatchAutoGenerateParameter.dto.GenerateParameterInput;
 import com.cs.BatchAutoGenerateParameter.dto.TscfEnterpriseGenereate;
@@ -18,23 +17,25 @@ import com.cs.BatchAutoGenerateParameter.repositories.ITerminalJPARepository;
 
 @Service
 public class GenerateParamterV1 {
-	
+
 	private static final Logger log = LogManager.getLogger(GenerateParamterV1.class);
-	
+
 	@Autowired
 	private GenerateParameterService generateParameterService;
-	
+
 	@Autowired
 	private ITerminalJPARepository terminalRepo;
-	
+
 	@Autowired
 	private IEnterpriseJPARepository enterpriseRepo;
 	
+	private int updatedById = 1;
+
 	public void AutoGenerateParameter(GenerateParameterInput input) {
 		GenerateParameter parameter = new GenerateParameter();
-		parameter.setUpdateById(1);
+		parameter.setUpdateById(updatedById);
 		
-		if(input.isGenerateAll()) {
+		if(input.getEnterpriseId()==null && input.getTerminalId() == null) {
 			try {
 				log.info(">> Generate All.");
 				List<TscfEnterpriseGenereate> gen = generateParameterService.generateAll(parameter);
@@ -46,7 +47,7 @@ public class GenerateParamterV1 {
 			//------------------------------------------
 			Enterprise en = enterpriseRepo.findByEnterpriseId(input.getEnterpriseId());
 			if(en != null) {
-				log.info(en.toString());
+//				log.info(en.toString());
 //				parameter.setEnterpriseIdPk(en.getId());
 				parameter.setEnterprise(en);
 			}else {
@@ -57,7 +58,7 @@ public class GenerateParamterV1 {
 			if(input.getEnterpriseId()!=null && input.getTerminalId() != null) {
 				Terminal tm = terminalRepo.findByTerminalId(input.getTerminalId());
 				if(tm!=null) {
-					log.info(tm.toString());
+//					log.info(tm.toString());
 //					parameter.setTerminalIdPk(tm.getId());
 					parameter.setTerminal(tm);
 					try {
@@ -73,7 +74,7 @@ public class GenerateParamterV1 {
 					return ;
 					
 				}
-			}else if(input.getEnterpriseId()!=null){
+			}else if(input.getEnterpriseId()!=null && input.getTerminalId() == null){
 				try {
 					log.info(">> Generate By Enterprise ID.");
 					TscfEnterpriseGenereate gen = generateParameterService.generateByEnterpriseId(parameter);

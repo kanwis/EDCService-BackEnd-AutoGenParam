@@ -43,6 +43,7 @@ public class IndividualParameterDDaoImpl implements IIndividualParameterDDao {
 				dto.setParameterCode(row[14] != null ? (String) row[14] : null);
 				dto.setEnterpriseIdPk(row[15] != null ? (int) row[15] : null);
 				dto.setMerchantIdPk(row[16] != null ? (int) row[16] : null);
+				dto.setBatchFlag(row[17] != null ? (Boolean) row[17] : null);
 				list.add(dto);
 			}
 		}

@@ -57,7 +57,7 @@ public class TscfBuild {
 			total+=tags.get(i-1).getCount();
 			System.out.println(tags.get(i-1).toString());
 		}
-		System.out.println("length summary >>"+total);
+//		System.out.println("length summary >>"+total);
 		tagData.setTags(tags);
 		tagData.setHeaderTotalLength(toHexEncode(total,4));
 //		System.err.println("---------------------");

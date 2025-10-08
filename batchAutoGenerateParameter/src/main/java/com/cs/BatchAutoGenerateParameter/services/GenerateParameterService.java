@@ -2,6 +2,7 @@ package com.cs.BatchAutoGenerateParameter.services;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cs.BatchAutoGenerateParameter.dao.ICommonParameterDDao;
+import com.cs.BatchAutoGenerateParameter.dao.ICommonParameterHDao;
 import com.cs.BatchAutoGenerateParameter.dao.IIndividualParameterDDao;
+import com.cs.BatchAutoGenerateParameter.dao.IIndividualParameterHDao;
 import com.cs.BatchAutoGenerateParameter.dao.ITscfDDao;
 import com.cs.BatchAutoGenerateParameter.dao.ITscfHDao;
 import com.cs.BatchAutoGenerateParameter.dto.CommonGenerateInfo;
@@ -46,70 +49,31 @@ public class GenerateParameterService {
 	@Autowired
 	private ITscfDDao tscfDDao;
 
-	public List<CommonGenereateDetailInfo> searchCommonDetailByTerminalId(Integer terminalId) throws Exception {
-		return comDDao.searchCommonDetailByTerminalId(terminalId, null, null);
-	}
+	@Autowired
+	private IIndividualParameterHDao individualHDao;
 
-	public List<IndividualGenerateDetailInfo> searchIndividualDetailByTerminalId(Integer terminalId) throws Exception {
-		return inDDao.searchIndividualDetailByTerminalId(terminalId);
-	}
-
-	/*
-	 * public List<TscfEnterpriseGenereate> previewGenerateAll(GenerateParameter
-	 * param) throws Exception {
-	 * 
-	 * List<TscfEnterpriseGenereate> getTscfList = new
-	 * ArrayList<TscfEnterpriseGenereate>(); List<TscfTerminalGenereate>
-	 * tscfTerminalList = null; TscfEnterpriseGenereate genTscf = null;
-	 * 
-	 * List<CommonGenerateInfo> enterpriseList = comDDao.searchGenerateCommonHAll();
-	 * String message = ""; if(enterpriseList != null && enterpriseList.size() >0) {
-	 * for(CommonGenerateInfo e : enterpriseList) { message = ""; genTscf = new
-	 * TscfEnterpriseGenereate(); genTscf.setEnterpriseIdPk(e.getEnterpriseIdPk());
-	 * genTscf.setEnterpriseId(e.getEnterpriseId());
-	 * genTscf.setEnterpriseNameTh(e.getEnterpriseNameTh());
-	 * genTscf.setMerchantIdPk(e.getMerchantIdPk());
-	 * genTscf.setMerchantId(e.getMerchantId()); TscfTerminalGenereate tscfTerminal
-	 * = null; List<CommonGenerateInfo> terminalList =
-	 * comDDao.searchGenerateCommonH(e.getEnterpriseIdPk(),null,null);
-	 * if(terminalList !=null && terminalList.size()>0) { tscfTerminalList = new
-	 * ArrayList<TscfTerminalGenereate>(); tscfTerminal = null;
-	 * for(CommonGenerateInfo t : terminalList) {
-	 * 
-	 * tscfTerminal = new TscfTerminalGenereate();
-	 * tscfTerminal.setTerminalIdPk(t.getTerminalIdPk());
-	 * tscfTerminal.setTerminalId(t.getTerminalId());
-	 * tscfTerminalList.add(tscfTerminal); // List<CommonGenereateDetailInfo>
-	 * commonDList = comDDao.searchGenerateCommonDetail(t.getCommonParameterHId(),
-	 * t.getParameterVersionId()); } genTscf.setTerminalIdList(tscfTerminalList);
-	 * 
-	 * }else { message = "ไม่พบ Terminal ID"; log.info("Not found Terminal ID."); }
-	 * if(tscfTerminalList!=null) {
-	 * 
-	 * }
-	 * 
-	 * genTscf.setMessage(message); getTscfList.add(genTscf); } }else { // message =
-	 * "ไม่พบ ข้อมูล สำหรับ Generate";
-	 * log.info("Not found common parameter in system"); }
-	 * 
-	 * return getTscfList;
-	 * 
-	 * }
-	 */
+	@Autowired
+	private ICommonParameterHDao commonHDao;
 
 	public List<TscfEnterpriseGenereate> generateAll(GenerateParameter param) throws Exception {
 		List<TscfEnterpriseGenereate> getTscfList = new ArrayList<TscfEnterpriseGenereate>();
 		List<TscfTerminalGenereate> tscfTerminalList = null;
 		TscfEnterpriseGenereate genTscf = null;
+		Integer individualHId = null;
 
 		List<CommonGenerateInfo> enterpriseList = comDDao.searchGenerateCommonHAll();
 		String message = "";
-		int i=0;int sizeI=0;int j=0,sizeJ=0;
+		int i = 0;
+		int sizeI = 0;
+		int j = 0, sizeJ = 0;
 		if (enterpriseList != null && enterpriseList.size() > 0) {
 			sizeI = enterpriseList.size();
-			log.info("Enterprise Size : "+sizeI);
-			for (CommonGenerateInfo e : enterpriseList) {i++;
-				log.info("("+i+"/"+sizeI+") Enterprise ID : " + e.getEnterpriseId() + "[" + e.getEnterpriseIdPk() + "]");
+			log.info("Enterprise Size : " + sizeI);
+			log.info("=================================");
+			for (CommonGenerateInfo e : enterpriseList) {
+				i++;
+				log.info("(" + i + "/" + sizeI + ") Enterprise ID : " + e.getEnterpriseId() + "["
+						+ e.getEnterpriseIdPk() + "]");
 				TscfHDto saveH = createTscfHDto(param.getUpdateById());
 
 				message = "";
@@ -120,58 +84,108 @@ public class GenerateParameterService {
 				genTscf.setMerchantIdPk(e.getMerchantIdPk());
 				genTscf.setMerchantId(e.getMerchantId());
 				TscfTerminalGenereate tscfTerminal = null;
-				j=0;sizeJ=0;
-				
+				individualHId = null;
+				j = 0;
+				sizeJ = 0;
+
 				List<CommonGenerateInfo> terminalList = comDDao.searchGenerateCommonH(e.getEnterpriseIdPk(), null, null);
 				if (terminalList != null && terminalList.size() > 0) {
 					tscfTerminalList = new ArrayList<TscfTerminalGenereate>();
 					tscfTerminal = null;
 					List<TscfDDto> saveDList = new ArrayList<TscfDDto>();
+					List<Integer> individualHIdList = new ArrayList<Integer>();
+					List<Integer> commHIdList = new ArrayList<Integer>();
+
 					sizeJ = terminalList.size();
-					log.info("Terminal Size : "+sizeJ);
-					for (CommonGenerateInfo t : terminalList) {j++;
-						
-						log.info("("+j+") Terminal ID : " + t.getTerminalId() + "[" + t.getTerminalIdPk() + "]");
+					log.info("Terminal Size : " + sizeJ);
+					if (e.getBatchFlag()) {
+						log.info("> Enterprise batch flag : " + e.getBatchFlag());
+					} else {
+						log.info("Enterprise batch flag : " + e.getBatchFlag());
+					}
+
+					for (CommonGenerateInfo t : terminalList) {
+						j++;
+						if (e.getBatchFlag()) {
+							log.info("> (" + j + ") Terminal ID : " + t.getTerminalId() + "[" + t.getTerminalIdPk()
+									+ "]");
+						} else {
+							log.info(
+									"(" + j + ") Terminal ID : " + t.getTerminalId() + "[" + t.getTerminalIdPk() + "]");
+						}
+
 						log.info("---------------------------------");
 						tscfTerminal = new TscfTerminalGenereate();
 						tscfTerminal.setTerminalIdPk(t.getTerminalIdPk());
 						tscfTerminal.setTerminalId(t.getTerminalId());
 						tscfTerminalList.add(tscfTerminal);
 
-						List<CommonGenereateDetailInfo> comDList = comDDao
-								.searchGenerateCommonDetail(t.getCommonParameterHId(), t.getParameterVersionId());
-						List<IndividualGenerateDetailInfo> inDList = inDDao
-								.searchIndividualDetailByTerminalId(t.getTerminalIdPk());
+						List<CommonGenereateDetailInfo> comDList = comDDao.searchGenerateCommonDetail(t.getCommonParameterHId(), t.getParameterVersionId());
+						List<IndividualGenerateDetailInfo> inDList = inDDao.searchIndividualDetailByTerminalId(t.getTerminalIdPk());
 
 						if (comDList.size() > 0 && inDList.size() > 0) {
 							List<String> parameterCodes = inDList.stream()
 									.map(IndividualGenerateDetailInfo::getParameterCode).collect(Collectors.toList());
-
 							comDList.removeIf(item -> parameterCodes.contains(item.getParameterCode()));
 						}
+						
+						if(inDList!=null && inDList.size() >0) {
+							individualHId = inDList.get(0).getIndividualParameterHId();
+						}
+						if (Boolean.TRUE.equals(e.getBatchFlag())) {
+							List<IndividualGenerateDetailInfo> inDListFalseList = inDList.stream().filter(info -> !info.getBatchFlag()).collect(Collectors.toList());
+							if (inDListFalseList.size() == 0) {
+								log.info("> Skip, Not found Individual batch flag=False, Enterprise ID :"
+										+ e.getEnterpriseId() + ", Terminal ID : " + t.getTerminalId());
+								log.info("----------------------------------------");
+								continue;
+							} else {
+								// ---------------------------------
+								// ---- For update Individual H ----
+								individualHId = inDListFalseList.get(0).getIndividualParameterHId();
+								individualHIdList.add(individualHId);
+								// --------------------------------
+								// Gen tscf
+								TscfBuild gen = new TscfBuild(null, inDListFalseList);
+								TscfTagData tags = gen.convertToTscfObject();
+//								System.err.println(">>"+tags.toTscf());
+								// -------------------------------
+								byte[] bytes = tags.toTscf().getBytes(StandardCharsets.UTF_8);
+								String tscfJson = new String(bytes, StandardCharsets.UTF_8);
+								// --------------------------------------
+								log.info("\n" + tscfJson);
+								// -------------------------------
+								TscfDDto saveD = createTscfDDto(null, param.getUpdateById(), t.getTerminalIdPk(), bytes,
+										tscfJson);
+								saveDList.add(saveD);
+								// --------------------------------------
+							}
+						} else {
+							// ---------------------------------
+							// ---- For update Common H ----
+							Integer commonHId = e.getCommonParameterHId();
+							commHIdList.add(commonHId);
+							// --------------------------------
+							individualHIdList.add(individualHId);
+							// --------------------------------
 
-//						log.info("----------------");
-//						log.info("Common size : "+comDList.size());
-//						log.info("Common {} : ",comDList);
-//						log.info("----------------");
-//						log.info("Individual size : "+inDList.size());
-//						log.info("Individual {} : ",inDList);
-
-						// Gen tscf
-						TscfBuild gen = new TscfBuild(comDList, inDList);
-						TscfTagData tags = gen.convertToTscfObject();
-//						System.err.println(">>"+tags.toTscf());
-						// -------------------------------
-
-						byte[] bytes = tags.toTscf().getBytes(StandardCharsets.UTF_8);
-						String tscfJson = new String(bytes, StandardCharsets.UTF_8);
-						// --------------------------------------
-						log.info(tscfJson);
-						// -------------------------------
-						TscfDDto saveD = createTscfDDto(null, param.getUpdateById(), t.getTerminalIdPk(), bytes, tscfJson);
-						saveDList.add(saveD);
-						// --------------------------------------
+							// Gen tscf
+							TscfBuild gen = new TscfBuild(comDList, inDList);
+							TscfTagData tags = gen.convertToTscfObject();
+//							System.err.println(">>"+tags.toTscf());
+							// -------------------------------
+							byte[] bytes = tags.toTscf().getBytes(StandardCharsets.UTF_8);
+							String tscfJson = new String(bytes, StandardCharsets.UTF_8);
+							// --------------------------------------
+							log.info("\n" + tscfJson);
+							// -------------------------------
+							TscfDDto saveD = createTscfDDto(null, param.getUpdateById(), t.getTerminalIdPk(), bytes,
+									tscfJson);
+							saveDList.add(saveD);
+							// --------------------------------------
+						}
 					}
+
 					genTscf.setTerminalIdList(tscfTerminalList);
 
 					if (saveDList.size() > 0) {
@@ -179,9 +193,35 @@ public class GenerateParameterService {
 						insertTscfByEnterprise(genTscf, saveH, saveDList);
 						// --------------------------------------
 						getTscfList.add(genTscf);
-					} else {
-						log.info("Tscf Dto is null.");
 					}
+//					else {
+//						log.info("Tscf Dto is null.");
+//					}
+					// -------------------
+					if (individualHIdList.size() > 0) {
+						try {
+							List<Integer> individualHIdList_new = individualHIdList.stream().distinct().collect(Collectors.toList());
+							individualHDao.updateBatchFlag(individualHIdList_new, param.getUpdateById());
+							log.info("Update Individual H successfully.");
+							log.info("---------------------------------");
+						} catch (Exception ex) {
+							log.info("ERROR Update Individual H batch flag :" + ex.getMessage());
+						}
+
+					}
+					if (commHIdList.size() > 0) {
+						try {
+							List<Integer> commHIdList_new = commHIdList.stream().distinct()
+									.collect(Collectors.toList());
+							commonHDao.updateBatchFlag(commHIdList_new, param.getUpdateById());
+							log.info("Update Common H successfully.");
+							log.info("---------------------------------");
+						} catch (Exception ex) {
+							log.info("ERROR Update Common H batch flag :" + ex.getMessage());
+						}
+
+					}
+					// -------------------
 				} else {
 					message = "ไม่พบ Terminal ID";
 					log.info("Not found Terminal ID [" + e.getEnterpriseId() + "].");
@@ -201,16 +241,16 @@ public class GenerateParameterService {
 	}
 
 	public TscfEnterpriseGenereate generateByEnterpriseId(GenerateParameter param) throws Exception {
-//		List<TscfEnterpriseGenereate> getTscfList = new ArrayList<TscfEnterpriseGenereate>();
+
 		List<TscfTerminalGenereate> tscfTerminalList = null;
 		TscfEnterpriseGenereate genTscf = null;
 
-//		List<CommonGenerateInfo> enterpriseList = comDDao.searchGenerateCommonHAll();
 		String message = "";
+		int j = 0, sizeJ = 0;
 		if (param.getEnterprise() != null) {
 			Enterprise e = param.getEnterprise();
-//			for(CommonGenerateInfo e : enterpriseList) {
 			log.info("Enterprise ID : " + e.getEnterpriseId() + "[" + e.getId() + "]");
+			log.info("=================================");
 			TscfHDto saveH = createTscfHDto(param.getUpdateById());
 
 			message = "";
@@ -226,8 +266,24 @@ public class GenerateParameterService {
 				tscfTerminalList = new ArrayList<TscfTerminalGenereate>();
 				tscfTerminal = null;
 				List<TscfDDto> saveDList = new ArrayList<TscfDDto>();
+				List<Integer> individualHIdList = new ArrayList<Integer>();
+				List<Integer> commHIdList = new ArrayList<Integer>();
+				
+				sizeJ = terminalList.size();
+				log.info("Terminal Size : " + sizeJ);
+				if (terminalList.get(0).getBatchFlag()) {
+					log.info("> Enterprise batch flag : " + terminalList.get(0).getBatchFlag());
+				} else {
+					log.info("Enterprise batch flag : " + terminalList.get(0).getBatchFlag());
+				}
 				for (CommonGenerateInfo t : terminalList) {
-					log.info("Terminal ID : " + t.getTerminalId() + "[" + t.getTerminalIdPk() + "]");
+					j++;
+					if (t.getBatchFlag()) {
+						log.info("> (" + j + ") Terminal ID : " + t.getTerminalId() + "[" + t.getTerminalIdPk() + "]");
+					} else {
+						log.info("(" + j + ") Terminal ID : " + t.getTerminalId() + "[" + t.getTerminalIdPk() + "]");
+					}
+
 					log.info("---------------------------------");
 					tscfTerminal = new TscfTerminalGenereate();
 					tscfTerminal.setTerminalIdPk(t.getTerminalIdPk());
@@ -242,24 +298,63 @@ public class GenerateParameterService {
 					if (comDList.size() > 0 && inDList.size() > 0) {
 						List<String> parameterCodes = inDList.stream()
 								.map(IndividualGenerateDetailInfo::getParameterCode).collect(Collectors.toList());
-
 						comDList.removeIf(item -> parameterCodes.contains(item.getParameterCode()));
 					}
 
-					// Gen tscf
-					TscfBuild gen = new TscfBuild(comDList, inDList);
-					TscfTagData tags = gen.convertToTscfObject();
-//						System.err.println(">>"+tags.toTscf());
-					// -------------------------------
+					if (Boolean.TRUE.equals(t.getBatchFlag())) {
+						List<IndividualGenerateDetailInfo> inDListFalseList = inDList.stream()
+								.filter(info -> !info.getBatchFlag()).collect(Collectors.toList());
+						if (inDListFalseList.size() == 0) {
+							log.info("> Skip, Not found Individual batch flag=False, Enterprise ID :"
+									+ e.getEnterpriseId() + ", Terminal ID : " + t.getTerminalId());
+							log.info("----------------------------------------");
+							continue;
+						} else {
+							// ---------------------------------
+							// ---- For update Individual H ----
+							Integer individualHId = inDListFalseList.get(0).getIndividualParameterHId();
+							individualHIdList.add(individualHId);
+							// --------------------------------
+							// Gen tscf
+							TscfBuild gen = new TscfBuild(null, inDListFalseList);
+							TscfTagData tags = gen.convertToTscfObject();
+//							System.err.println(">>"+tags.toTscf());
+							// -------------------------------
+							byte[] bytes = tags.toTscf().getBytes(StandardCharsets.UTF_8);
+							String tscfJson = new String(bytes, StandardCharsets.UTF_8);
+							// --------------------------------------
+							log.info("\n" + tscfJson);
+							// -------------------------------
+							TscfDDto saveD = createTscfDDto(null, param.getUpdateById(), t.getTerminalIdPk(), bytes,
+									tscfJson);
+							saveDList.add(saveD);
+							// --------------------------------------
+						}
+					} else {
+						// ---------------------------------
+						// ---- For update Common H ----
+						Integer commonHId = t.getCommonParameterHId();
+						commHIdList.add(commonHId);
+						// --------------------------------
+						Integer individualHId = inDList.get(0).getIndividualParameterHId();
+						individualHIdList.add(individualHId);
+						// --------------------------------
 
-					byte[] bytes = tags.toTscf().getBytes(StandardCharsets.UTF_8);
-					String tscfJson = new String(bytes, StandardCharsets.UTF_8);
-					// --------------------------------------
-					log.info(tscfJson);
-					// -------------------------------
-					TscfDDto saveD = createTscfDDto(null, param.getUpdateById(), t.getTerminalIdPk(), bytes, tscfJson);
-					saveDList.add(saveD);
-					// --------------------------------------
+						// Gen tscf
+						TscfBuild gen = new TscfBuild(comDList, inDList);
+						TscfTagData tags = gen.convertToTscfObject();
+//						System.err.println(">>"+tags.toTscf());
+						// -------------------------------
+						byte[] bytes = tags.toTscf().getBytes(StandardCharsets.UTF_8);
+						String tscfJson = new String(bytes, StandardCharsets.UTF_8);
+						// --------------------------------------
+						log.info("\n" + tscfJson);
+						// -------------------------------
+						TscfDDto saveD = createTscfDDto(null, param.getUpdateById(), t.getTerminalIdPk(), bytes,
+								tscfJson);
+						saveDList.add(saveD);
+						// --------------------------------------
+					}
 				}
 				genTscf.setTerminalIdList(tscfTerminalList);
 
@@ -268,9 +363,35 @@ public class GenerateParameterService {
 					insertTscfByEnterprise(genTscf, saveH, saveDList);
 					// --------------------------------------
 //						getTscfList.add(genTscf);
-				} else {
-					log.info("Tscf Dto is null.");
 				}
+//				else {
+//					log.info("Tscf Dto is null.");
+//				}
+				// -------------------
+				if (individualHIdList.size() > 0) {
+					try {
+						List<Integer> individualHIdList_new = individualHIdList.stream().distinct()
+								.collect(Collectors.toList());
+						individualHDao.updateBatchFlag(individualHIdList_new, param.getUpdateById());
+						log.info("Update Individual H successfully.");
+						log.info("---------------------------------");
+					} catch (Exception ex) {
+						log.info("ERROR Update Individual H batch flag :" + ex.getMessage());
+					}
+
+				}
+				if (commHIdList.size() > 0) {
+					try {
+						List<Integer> commHIdList_new = commHIdList.stream().distinct().collect(Collectors.toList());
+						commonHDao.updateBatchFlag(commHIdList_new, param.getUpdateById());
+						log.info("Update Common H successfully.");
+						log.info("---------------------------------");
+					} catch (Exception ex) {
+						log.info("ERROR Update Common H batch flag :" + ex.getMessage());
+					}
+
+				}
+				// -------------------
 			} else {
 				message = "ไม่พบ Terminal ID";
 				log.info("Not found Terminal ID [" + e.getEnterpriseId() + "].");
@@ -293,53 +414,93 @@ public class GenerateParameterService {
 		TscfEnterpriseGenereate genTscf = null;
 		Terminal tm = param.getTerminal();
 		Enterprise en = param.getEnterprise();
-		log.info("Enterprise ID : " + en.getEnterpriseId() + "[" + en.getId() + "]");
-		log.info("Terminal ID : " + tm.getTerminalId() + "[" + tm.getId() + "]");
-		log.info("---------------------------------");
+		Boolean batchFlag = null;
+		Integer commonHId = null;
+		Integer individualHId = null;
+		
+		
+		log.info("Enterprise ID : " + en.getEnterpriseId() + "[" + en.getId() + "], "+"Terminal ID : " + tm.getTerminalId() + "[" + tm.getId() + "]");
+		log.info("=================================");
+		
 		List<CommonGenereateDetailInfo> comDList = comDDao.searchCommonDetailByTerminalId(en.getId(), null, tm.getId());
-		List<IndividualGenerateDetailInfo> inDList = inDDao.searchIndividualDetailByTerminalId(tm.getId());
-
-		if (comDList.size() > 0 && inDList.size() > 0) {
-			List<String> parameterCodes = inDList.stream().map(IndividualGenerateDetailInfo::getParameterCode)
-					.collect(Collectors.toList());
-
-			comDList.removeIf(item -> parameterCodes.contains(item.getParameterCode()));
-		}
-//		log.info("----------------");
-//		log.info("Common size : " + comDList.size());
-//		log.info("Common {} : ", comDList);
-//		log.info("----------------");
-//		log.info("Individual size : " + inDList.size());
-//		log.info("Individual {} : ", inDList);
-
-		if (comDList.size() > 0 || inDList.size() > 0) {
+		if(comDList !=null && comDList.size() >0) {
+	
+			List<IndividualGenerateDetailInfo> inDList = inDDao.searchIndividualDetailByTerminalId(tm.getId());
+	
+			if (comDList.size() > 0 && inDList.size() > 0) {
+				List<String> parameterCodes = inDList.stream().map(IndividualGenerateDetailInfo::getParameterCode).collect(Collectors.toList());
+				comDList.removeIf(item -> parameterCodes.contains(item.getParameterCode()));
+			}
+	
 			Integer enterpriseId = null;
 			Integer merchantId = null;
+			
 			if (comDList.size() > 0) {
 				enterpriseId = comDList.get(0).getEnterpriseIdPk();
 				merchantId = comDList.get(0).getMerchantIdPk();
-			} else if (inDList.size() > 0) {
-				enterpriseId = inDList.get(0).getEnterpriseIdPk();
-				merchantId = inDList.get(0).getMerchantIdPk();
+				batchFlag = comDList.get(0).getBatchFlag();
+				commonHId = comDList.get(0).getCommonParameterHId();
 			}
+			if(inDList.size() > 0) {
+				individualHId = inDList.get(0).getIndividualParameterHId();
+			}
+				
+			if (batchFlag) {
+				log.info("> Enterprise batch flag : " + batchFlag);
+			} else {
+				log.info("Enterprise batch flag : " + batchFlag);
+			}
+			
+			log.info("---------------------------------");
 			genTscf = new TscfEnterpriseGenereate();
 			genTscf.setEnterpriseIdPk(enterpriseId);
 			genTscf.setMerchantIdPk(merchantId);
-			TscfBuild gen = new TscfBuild(comDList, inDList);
-			TscfTagData tags = gen.convertToTscfObject();
+			//-------------------------------------------------
+			if (Boolean.TRUE.equals(batchFlag)) {
+				List<IndividualGenerateDetailInfo> inDListFalseList = inDList.stream().filter(info -> !info.getBatchFlag()).collect(Collectors.toList());
+				if (inDListFalseList.size() == 0) {
+					log.info("> Skip, Not found Individual batch flag=False, Enterprise ID :"+  en.getEnterpriseId() + ", Terminal ID : " + tm.getTerminalId());
+					log.info("----------------------------------------");
+				} else {
+					// Gen tscf
+					TscfBuild gen = new TscfBuild(null, inDListFalseList);
+					TscfTagData tags = gen.convertToTscfObject();
+					// -------------------------------
+					byte[] bytes = tags.toTscf().getBytes(StandardCharsets.UTF_8);
+					String tscfJson = new String(bytes, StandardCharsets.UTF_8);
+					// --------------------------------------
+					log.info("\n" + tscfJson);
+					// --------------------------------------
+					insertTscf(genTscf, param.getUpdateById(), tm.getId(), bytes);
+					
+					List<Integer> individualHIdList_new = new ArrayList<>(Arrays.asList(individualHId));
+					individualHDao.updateBatchFlag(individualHIdList_new, param.getUpdateById());
+					// --------------------------------------
+				}
+			} else {
 
-			genTscf.setTscfHResult(null);
-
-			byte[] bytes = tags.toTscf().getBytes(StandardCharsets.UTF_8);
-			String tscfJson = new String(bytes, StandardCharsets.UTF_8);
-			// --------------------------------------
-			log.info(tscfJson);
-			// --------------------------------------
-			insertTscf(genTscf, param.getUpdateById(), tm.getId(), bytes);
-			// --------------------------------------
-
+				// Gen tscf
+				TscfBuild gen = new TscfBuild(comDList, inDList);
+				TscfTagData tags = gen.convertToTscfObject();
+				// -------------------------------
+				byte[] bytes = tags.toTscf().getBytes(StandardCharsets.UTF_8);
+				String tscfJson = new String(bytes, StandardCharsets.UTF_8);
+				// --------------------------------------
+				log.info("\n" + tscfJson);
+				// --------------------------------------
+				insertTscf(genTscf, param.getUpdateById(), tm.getId(), bytes);
+				
+				List<Integer> individualHIdList_new = new ArrayList<>(Arrays.asList(individualHId));
+				List<Integer> commHIdList_new = new ArrayList<>(Arrays.asList(commonHId));
+				
+				individualHDao.updateBatchFlag(individualHIdList_new, param.getUpdateById());
+				
+				commonHDao.updateBatchFlag(commHIdList_new, param.getUpdateById());
+				// --------------------------------------
+			}
+			//-------------------------------------------------
 		} else {
-			log.info("Parameter is null Terminal ID=" + tm.getId());
+			log.info("Not found common parameter in system.");
 		}
 		return genTscf;
 	}
