@@ -51,7 +51,8 @@ public class GenerateParamterV1 {
 //				parameter.setEnterpriseIdPk(en.getId());
 				parameter.setEnterprise(en);
 			}else {
-				log.info("Not found Enterprise ID : "+input.getEnterpriseId());
+				log.info("Not Found EnterpriseId : "+input.getEnterpriseId());
+//				log.info("Not Found EnterpriseId or TerminalId");
 				return ;
 			}
 			//------------------------------------------
@@ -71,6 +72,7 @@ public class GenerateParamterV1 {
 					
 				}else {
 					log.info("Not found Terminal ID : "+input.getTerminalId());
+//					log.info("Not Found EnterpriseId or TerminalId");
 					return ;
 					
 				}

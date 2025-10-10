@@ -54,7 +54,7 @@ public class BatchAutoGenerateParameterApplication implements CommandLineRunner 
 
 		String enterpriseId = null;
 		String terminalId = null;
-//		boolean generateAll = false;
+		
 		for (int i = 0; i < args.length; i++) {
 			log.info("Parameter " + (i + 1) + ": " + args[i]);
 		}
@@ -126,13 +126,13 @@ public class BatchAutoGenerateParameterApplication implements CommandLineRunner 
 
 	public static boolean isValidTerminalId(String terminalId) throws Exception {
 		if (terminalId.isEmpty()) {
-			log.info("Invalid Terminal ID : "+ResponseCode.VALIDATE_TERMINALID_REQUIRED.getMessage());
+			log.info("Invalid TerminalId : "+ResponseCode.VALIDATE_TERMINALID_REQUIRED.getMessage());
 			return false;
 		} else if (terminalId.length() != 8) {
-			log.info("Invalid Terminal ID : "+ResponseCode.VALIDATE_TERMINALID_LENGTH.getMessage());
+			log.info("Invalid TerminalId : "+ResponseCode.VALIDATE_TERMINALID_LENGTH.getMessage());
 			return false;
 		} else if (!terminalId.matches("\\d+")) {
-			log.info("Invalid Terminal ID : "+ResponseCode.VALIDATE_TERMINALID_NUMBER.getMessage());
+			log.info("Invalid TerminalId : "+ResponseCode.VALIDATE_TERMINALID_NUMBER.getMessage());
 			return false;
 		}
 		return true;
@@ -140,13 +140,13 @@ public class BatchAutoGenerateParameterApplication implements CommandLineRunner 
 
 	public static boolean isValidEnterpriseId(String enterpriseId) throws Exception {
 		if (enterpriseId.isEmpty()) {
-			log.info("Invalid Enterprise ID : "+ResponseCode.VALIDATE_ENTERPRISEID_REQUIRED.getMessage());
+			log.info("Invalid EnterpriseId : "+ResponseCode.VALIDATE_ENTERPRISEID_REQUIRED.getMessage());
 			return false;
 		} else if (enterpriseId.length() != 8) {
-			log.info("Invalid Enterprise ID : "+ResponseCode.VALIDATE_ENTERPRISEID_LENGTH.getMessage());
+			log.info("Invalid EnterpriseId : "+ResponseCode.VALIDATE_ENTERPRISEID_LENGTH.getMessage());
 			return false;
 		} else if (!enterpriseId.matches("\\d+")) {
-			log.info("Invalid Enterprise ID : "+ResponseCode.VALIDATE_ENTERPRISEID_NUMBER.getMessage());
+			log.info("Invalid EnterpriseId : "+ResponseCode.VALIDATE_ENTERPRISEID_NUMBER.getMessage());
 			return false;
 		}
 		return true;
