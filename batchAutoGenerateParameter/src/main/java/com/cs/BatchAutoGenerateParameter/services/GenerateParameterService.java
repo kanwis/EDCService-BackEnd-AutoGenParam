@@ -173,8 +173,8 @@ public class GenerateParameterService {
 							// --------------------------------
 							individualHIdList.add(individualHId);
 							// --------------------------------
-							System.out.println(">>size comDList="+comDList.size());
-							System.out.println(">>size inDList="+inDList.size());
+//							System.out.println(">>size comDList="+comDList.size());
+//							System.out.println(">>size inDList="+inDList.size());
 							try {
 								// Gen tscf
 								TscfBuild gen = new TscfBuild(comDList, inDList);
@@ -278,19 +278,16 @@ public class GenerateParameterService {
 					tscfTerminal.setTerminalIdPk(t.getTerminalIdPk());
 					tscfTerminal.setTerminalId(t.getTerminalId());
 					tscfTerminalList.add(tscfTerminal);
-					log.info(">>common h id="+t.getCommonParameterHId()+",version="+t.getParameterVersionId());
-					List<CommonGenereateDetailInfo> comDList = comDDao
-							.searchGenerateCommonDetail(t.getCommonParameterHId(), t.getParameterVersionId());
-					List<IndividualGenerateDetailInfo> inDList = inDDao
-							.searchIndividualDetailByTerminalId(t.getTerminalIdPk());
-					log.info("comm str{},",comDList);
+					
+					List<CommonGenereateDetailInfo> comDList = comDDao.searchGenerateCommonDetail(t.getCommonParameterHId(), t.getParameterVersionId());
+					List<IndividualGenerateDetailInfo> inDList = inDDao.searchIndividualDetailByTerminalId(t.getTerminalIdPk());
+					
 					if(comDList==null || comDList.size()==0) {
 						log.info("Not Found Common Parameter.");
 						continue;
 					}
 					if (comDList.size() > 0 && inDList.size() > 0) {
-						List<String> parameterCodes = inDList.stream()
-								.map(IndividualGenerateDetailInfo::getParameterCode).collect(Collectors.toList());
+						List<String> parameterCodes = inDList.stream().map(IndividualGenerateDetailInfo::getParameterCode).collect(Collectors.toList());
 						comDList.removeIf(item -> parameterCodes.contains(item.getParameterCode()));
 					}
 
@@ -299,8 +296,7 @@ public class GenerateParameterService {
 					}
 					
 					if (Boolean.TRUE.equals(t.getBatchFlag())) {
-						List<IndividualGenerateDetailInfo> inDListFalseList = inDList.stream()
-								.filter(info -> !info.getBatchFlag()).collect(Collectors.toList());
+						List<IndividualGenerateDetailInfo> inDListFalseList = inDList.stream().filter(info -> !info.getBatchFlag()).collect(Collectors.toList());
 						if (inDListFalseList.size() == 0) {
 							log.info("No Generate Parameter.");
 							log.info("> Skip, Not found Individual batch flag=False, Enterprise ID :"+ e.getEnterpriseId() + ", Terminal ID : " + t.getTerminalId());

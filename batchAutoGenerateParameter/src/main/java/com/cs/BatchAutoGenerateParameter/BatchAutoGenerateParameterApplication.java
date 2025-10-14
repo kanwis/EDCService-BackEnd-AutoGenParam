@@ -52,8 +52,9 @@ public class BatchAutoGenerateParameterApplication implements CommandLineRunner 
 	public void run(String... args) throws Exception {
 		log.info("*************** START BatchAutoGenerateParameter ***************");
 
-		String enterpriseId = null;
+		String enterpriseId = null;//"00000036";
 		String terminalId = null;
+		
 		
 		for (int i = 0; i < args.length; i++) {
 			log.info("Parameter " + (i + 1) + ": " + args[i]);
