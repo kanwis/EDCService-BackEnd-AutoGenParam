@@ -148,7 +148,7 @@ public class DateUtils {
 
     public static String currentDate() throws ParseException {// Constants.DATE_FORMAT_yyyyMMdd
     	 Date now = new Date();
-         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm"); 
+         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss"); 
          String formatted = sdf.format(now);
 //         System.out.println(formatted);
 		return formatted;
